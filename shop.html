@@ -416,6 +416,50 @@
     </footer>
 
 
-</body>
+<script>
+    const filterButtons = document.querySelectorAll(".filter");
+    const products = document.querySelectorAll(".shop-product");
 
+    filterButtons.forEach(button => {
+        button.addEventListener("click", () => {
+
+            // Remove active from all buttons
+            filterButtons.forEach(btn => {
+                btn.classList.remove("active");
+            });
+
+            // Add active to clicked button
+            button.classList.add("active");
+
+            const filter = button.textContent.trim().toLowerCase();
+
+            products.forEach(product => {
+
+                const productName = product
+                    .querySelector("h3")
+                    .textContent
+                    .toLowerCase();
+
+                if (filter === "all") {
+                    product.style.display = "";
+                }
+                else if (filter === "t-shirts") {
+                    product.style.display =
+                        productName.includes("tee") ? "" : "none";
+                }
+                else if (filter === "shirts") {
+                    product.style.display =
+                        productName.includes("shirt") ? "" : "none";
+                }
+                else if (filter === "hoodies") {
+                    product.style.display =
+                        productName.includes("hoodie") ? "" : "none";
+                }
+
+            });
+        });
+    });
+</script>
+
+</body>
 </html>
