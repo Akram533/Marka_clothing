@@ -264,132 +264,244 @@
     <!-- CART JAVASCRIPT -->
     <script>
 
-        let cart = JSON.parse(localStorage.getItem("markaCart")) || [];
+let cart = JSON.parse(localStorage.getItem("markaCart")) || [];
 
-        function displayCart() {
 
-            const cartContent = document.getElementById("cart-content");
+// GROUP SAME PRODUCTS
+function getGroupedCart() {
 
-            if (cart.length === 0) {
+    const grouped = {};
 
-                cartContent.innerHTML = `
-                    <div class="empty-cart">
-                        <h2>Your cart is empty</h2>
-                        <p>Add some products to your cart to get started.</p>
-                        <a href="shop.html">CONTINUE SHOPPING</a>
-                    </div>
-                `;
+    cart.forEach(item => {
 
-                return;
-            }
+        if (grouped[item.name]) {
 
-            let itemsHTML = "";
+            grouped[item.name].quantity++;
 
-            cart.forEach((item, index) => {
+        } else {
 
-                itemsHTML += `
-                    <div class="cart-item">
+            grouped[item.name] = {
+                name: item.name,
+                price: item.price,
+                image: item.image,
+                quantity: 1
+            };
 
-                        <img src="${item.image}" alt="${item.name}">
+        }
 
-                        <div class="cart-item-info">
-                            <h3>${item.name}</h3>
-                            <p class="cart-item-price">${item.price}</p>
-                            <p>Quantity: 1</p>
-                        </div>
+    });
+
+    return Object.values(grouped);
+}
+
+
+// DISPLAY CART
+function displayCart() {
+
+    const cartContent = document.getElementById("cart-content");
+
+    const groupedCart = getGroupedCart();
+
+    if (groupedCart.length === 0) {
+
+        cartContent.innerHTML = `
+            <div class="empty-cart">
+                <h2>Your cart is empty</h2>
+                <p>Looks like you haven't added anything yet.</p>
+
+                <a href="shop.html" class="btn">
+                    CONTINUE SHOPPING
+                </a>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    let total = 0;
+
+    let html = `
+        <div class="cart-items">
+    `;
+
+
+    groupedCart.forEach((item, index) => {
+
+        const price = parseInt(
+            item.price.replace(/[₹,]/g, "")
+        );
+
+        const itemTotal = price * item.quantity;
+
+        total += itemTotal;
+
+
+        html += `
+            <div class="cart-item">
+
+                <img
+                    src="${item.image}"
+                    alt="${item.name}"
+                >
+
+                <div class="cart-item-info">
+
+                    <h3>${item.name}</h3>
+
+                    <p>${item.price}</p>
+
+
+                    <div class="quantity-controls">
 
                         <button
-                            class="remove-btn"
-                            onclick="removeItem(${index})">
-                            REMOVE
+                            onclick="changeQuantity(${index}, -1)">
+                            −
+                        </button>
+
+                        <span>
+                            ${item.quantity}
+                        </span>
+
+                        <button
+                            onclick="changeQuantity(${index}, 1)">
+                            +
                         </button>
 
                     </div>
-                `;
-            });
-
-
-            let total = 0;
-
-            cart.forEach(item => {
-
-                const price = parseFloat(
-                    item.price.replace(/[₹,]/g, "")
-                );
-
-                total += price;
-
-            });
-
-
-            cartContent.innerHTML = `
-
-                <div class="cart-container">
-
-                    ${itemsHTML}
 
                 </div>
 
-                <div class="cart-summary">
 
-                    <div class="summary-box">
+                <div class="cart-item-right">
 
-                        <h2>ORDER SUMMARY</h2>
+                    <strong>
+                        ₹${itemTotal.toLocaleString("en-IN")}
+                    </strong>
 
-                        <div class="summary-row">
-                            <span>Items</span>
-                            <span>${cart.length}</span>
-                        </div>
-
-                        <div class="summary-row summary-total">
-                            <span>TOTAL</span>
-                            <span>₹${total.toLocaleString("en-IN")}</span>
-                        </div>
-
-                        <button
-                            class="checkout-btn"
-                            onclick="checkout()">
-                            PROCEED TO CHECKOUT
-                        </button>
-
-                        <a
-                            href="shop.html"
-                            class="continue-shopping">
-                            Continue Shopping
-                        </a>
-
-                    </div>
+                    <button
+                        class="remove-btn"
+                        onclick="removeItem(${index})">
+                        REMOVE
+                    </button>
 
                 </div>
-            `;
+
+            </div>
+        `;
+
+    });
+
+
+    html += `
+        </div>
+
+        <div class="cart-summary">
+
+            <h2>
+                Total:
+                ₹${total.toLocaleString("en-IN")}
+            </h2>
+
+            <button
+                class="checkout-btn"
+                onclick="checkout()">
+                CHECKOUT
+            </button>
+
+        </div>
+    `;
+
+
+    cartContent.innerHTML = html;
+
+}
+
+
+// CHANGE QUANTITY
+function changeQuantity(index, change) {
+
+    const groupedCart = getGroupedCart();
+
+    const item = groupedCart[index];
+
+    if (!item) return;
+
+
+    if (change === 1) {
+
+        cart.push({
+            name: item.name,
+            price: item.price,
+            image: item.image
+        });
+
+    }
+
+
+    if (change === -1) {
+
+        const itemIndex = cart.findIndex(
+            product => product.name === item.name
+        );
+
+        if (itemIndex !== -1) {
+
+            cart.splice(itemIndex, 1);
+
         }
 
-
-        function removeItem(index) {
-
-            cart.splice(index, 1);
-
-            localStorage.setItem(
-                "markaCart",
-                JSON.stringify(cart)
-            );
-
-            displayCart();
-        }
+    }
 
 
-        function checkout() {
-
-            alert(
-                "Checkout is coming next! Your cart is ready."
-            );
-
-        }
+    localStorage.setItem(
+        "markaCart",
+        JSON.stringify(cart)
+    );
 
 
-        displayCart();
+    displayCart();
 
-    </script>
+}
+
+
+// REMOVE PRODUCT
+function removeItem(index) {
+
+    const groupedCart = getGroupedCart();
+
+    const item = groupedCart[index];
+
+    cart = cart.filter(
+        product => product.name !== item.name
+    );
+
+
+    localStorage.setItem(
+        "markaCart",
+        JSON.stringify(cart)
+    );
+
+
+    displayCart();
+
+}
+
+
+// CHECKOUT
+function checkout() {
+
+    alert(
+        "Checkout is coming next! Your cart is ready."
+    );
+
+}
+
+
+// START
+displayCart();
+
+</script>
 
 </body>
 </html>
