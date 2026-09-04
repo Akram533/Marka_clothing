@@ -541,7 +541,37 @@
     </div>
 
 </footer>
+<script>
+    let cart = JSON.parse(localStorage.getItem("markaCart")) || [];
 
+    const addButtons = document.querySelectorAll(".product-card button");
+
+    addButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const product = button.closest(".product-card");
+
+            if (!product) return;
+
+            const name = product.querySelector("h3").textContent.trim();
+            const price = product.querySelector("strong").textContent.trim();
+            const image = product.querySelector("img").getAttribute("src");
+
+            cart.push({
+                name: name,
+                price: price,
+                image: image
+            });
+
+            localStorage.setItem("markaCart", JSON.stringify(cart));
+
+            button.textContent = "ADDED ✓";
+
+            setTimeout(() => {
+                button.textContent = "ADD TO CART";
+            }, 1500);
+        });
+    });
+</script>
 
 </body>
 
