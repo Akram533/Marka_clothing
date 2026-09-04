@@ -572,6 +572,52 @@
         });
     });
 </script>
+    <script>
+
+let homeCart = JSON.parse(localStorage.getItem("markaCart")) || [];
+
+const homeAddButtons = document.querySelectorAll(".add-cart");
+
+homeAddButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const product = button.closest(".product-card");
+
+        const name = product.querySelector("h3").textContent.trim();
+
+        const price = product.querySelector(".price").textContent.trim();
+
+        const image = product.querySelector("img").getAttribute("src");
+
+
+        const item = {
+            name: name,
+            price: price,
+            image: image
+        };
+
+
+        homeCart.push(item);
+
+        localStorage.setItem(
+            "markaCart",
+            JSON.stringify(homeCart)
+        );
+
+
+        button.textContent = "ADDED ✓";
+
+
+        setTimeout(() => {
+            button.textContent = "ADD +";
+        }, 1500);
+
+    });
+
+});
+
+</script>
 
 </body>
 
