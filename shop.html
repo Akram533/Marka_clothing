@@ -55,9 +55,9 @@
 
                 <a href="#" aria-label="Search">⌕</a>
 
-                <a href="#" aria-label="Shopping bag">
-                    🛍
-                </a>
+                <a href="cart.html" aria-label="Shopping bag">
+    🛍
+</a>
 
             </div>
 
@@ -523,6 +523,40 @@
 
     updateCartCount();
 </script>
+<script>
+    let cart = JSON.parse(localStorage.getItem("markaCart")) || [];
 
+    const addButtons = document.querySelectorAll(".shop-add");
+
+    addButtons.forEach(button => {
+        button.addEventListener("click", () => {
+
+            const product = button.closest(".shop-product");
+
+            const name = product.querySelector("h3").textContent.trim();
+            const price = product.querySelector("strong").textContent.trim();
+            const image = product.querySelector("img").getAttribute("src");
+
+            const item = {
+                name: name,
+                price: price,
+                image: image
+            };
+
+            cart.push(item);
+
+            localStorage.setItem(
+                "markaCart",
+                JSON.stringify(cart)
+            );
+
+            button.textContent = "ADDED ✓";
+
+            setTimeout(() => {
+                button.textContent = "ADD TO CART";
+            }, 1500);
+        });
+    });
+</script>
 </body>
 </html>
